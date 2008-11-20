@@ -1,0 +1,11 @@
+
+Bd
+==
+
+A Java build tool.
+
+Todo
+====
+
+* Bootstrap ourselves without ant (would be cool, but, eh)
+

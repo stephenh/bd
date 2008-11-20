@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<project name="bd" default="jar" basedir=".">
+
+	<target name="clean">
+		<delete dir="bin"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="bin/main"/>
+		<javac srcdir="src/main" destdir="bin/main" debug="true" nowarn="yes" source="1.5" target="1.5" encoding="utf8">
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="bin/bd.jar">
+			<fileset dir="bin/main" includes="**/*.class"/>
+		</jar>
+	</target>
+
+</project>
+
