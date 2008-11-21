@@ -9,8 +9,12 @@ import java.util.List;
 
 public class BuildRunner {
 
-    public static void run(Object build, String[] args) {
-        new BuildRunner(build, args).run();
+    public static void main(String[] args) {
+        try {
+            new BuildRunner(Class.forName("Build").newInstance(), args).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private final Object build;
@@ -75,11 +79,9 @@ public class BuildRunner {
     }
 
     private void addMethodNames(List<String> methodNames, Class<?> type, String prefix) {
-    	List<Method> objectMethods = Arrays.asList(Object.class.getMethods());
+        List<Method> objectMethods = Arrays.asList(Object.class.getMethods());
         for (Method method : type.getMethods()) {
-            if (method.getParameterTypes().length == 0
-                && !objectMethods.contains(method)
-                && !method.getName().startsWith("get")) {
+            if (method.getParameterTypes().length == 0 && !objectMethods.contains(method) && !method.getName().startsWith("get")) {
                 methodNames.add(prefix + method.getName());
             }
         }
