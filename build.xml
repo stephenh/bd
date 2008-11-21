@@ -16,6 +16,8 @@
 		<jar destfile="bin/bd.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
 		</jar>
+		<mkdir dir="~/.bd"/>
+		<copy todir="~/.bd" file="bin/bd.jar"/>
 	</target>
 
 </project>
