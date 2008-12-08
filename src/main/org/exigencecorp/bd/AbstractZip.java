@@ -16,19 +16,29 @@ import java.util.zip.ZipOutputStream;
 public abstract class AbstractZip<T extends AbstractZip<T>> {
 
     private final File destination;
-    private final List<Files> files = new ArrayList<Files>();
+    private final List<FilesWithPrefix> files = new ArrayList<FilesWithPrefix>();
 
     public AbstractZip(String destinationPath) {
         this.destination = new File(destinationPath);
     }
 
     public T includes(Files files) {
-        this.files.add(files);
+        this.files.add(new FilesWithPrefix("", files));
         return (T) this;
     }
 
     public T includes(File path) {
-        this.files.add(new Files(path));
+        this.files.add(new FilesWithPrefix("", new Files(path)));
+        return (T) this;
+    }
+
+    public T includes(String prefix, Files files) {
+        this.files.add(new FilesWithPrefix(prefix, files));
+        return (T) this;
+    }
+
+    public T includes(String prefix, File path) {
+        this.files.add(new FilesWithPrefix(prefix, new Files(path)));
         return (T) this;
     }
 
@@ -38,12 +48,12 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
             OutputStream out = new BufferedOutputStream(new FileOutputStream(this.destination));
             ZipOutputStream zipOut = this.makeZipOutputStream(out);
             zipOut.setLevel(Deflater.BEST_COMPRESSION);
-            for (Files files : this.files) {
-                for (File file : files.getFilesBySuffix()) {
+            for (FilesWithPrefix fwp : this.files) {
+                for (File file : fwp.files.getFilesBySuffix()) {
                     // normalize the path (replace / with \ if required)
-                    String entryName = this.removeBase(files.getBasePath().getPath(), file.getPath());
+                    String entryName = this.removeBase(fwp.files.getBasePath().getPath(), file.getPath());
                     byte[] data = this.readFile(file);
-                    ZipEntry entry = new ZipEntry(entryName);
+                    ZipEntry entry = new ZipEntry(fwp.prefix + entryName);
                     CRC32 crc = new CRC32();
                     crc.update(data);
                     entry.setSize(file.length());
@@ -90,6 +100,16 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
             return buffer;
         } catch (IOException e) {
             throw new Error("Error reading from file " + file, e);
+        }
+    }
+
+    private static final class FilesWithPrefix {
+        private final String prefix;
+        private final Files files;
+
+        private FilesWithPrefix(String prefix, Files files) {
+            this.prefix = prefix;
+            this.files = files;
         }
     }
 

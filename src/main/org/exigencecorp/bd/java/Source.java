@@ -9,17 +9,22 @@ import org.exigencecorp.bd.Files;
 
 public class Source {
 
-    private final Files sourceFiles;
+    private final List<Files> sourceFiles = new ArrayList<Files>();
     private final File destination;
     private final List<Files> libraries = new ArrayList<Files>();
 
     public Source(String basePath, String destinationPath) {
-        this.sourceFiles = new Files(basePath);
+        this.sourceFiles.add(new Files(basePath));
         this.destination = new File(destinationPath);
     }
 
     public Source lib(Lib lib) {
         this.libraries.add(lib.getJarFiles());
+        return this;
+    }
+
+    public Source addSource(String basePath) {
+        this.sourceFiles.add(new Files(basePath));
         return this;
     }
 
@@ -39,7 +44,9 @@ public class Source {
                 cp += files.getPathsJoined();
             }
             args.add(cp);
-            args.addAll(this.sourceFiles.getPaths());
+            for (Files files : this.sourceFiles) {
+                args.addAll(files.getPaths());
+            }
 
             String[] argsArray = args.toArray(new String[args.size()]);
             Integer result = ((Integer) compile.invoke(instance, new Object[] { argsArray })).intValue();
@@ -49,10 +56,6 @@ public class Source {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public Files getSourceFiles() {
-        return this.sourceFiles;
     }
 
     public File getDestination() {
