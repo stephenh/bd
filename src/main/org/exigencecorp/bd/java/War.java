@@ -21,19 +21,19 @@ public class War extends AbstractZip<War> {
     }
 
     public War classes(File destination) {
-        return super.includes("WEB-INF/classes", destination);
+        return super.includes("WEB-INF/classes/", destination);
     }
 
     public War classes(Files destination) {
-        return super.includes("WEB-INF/classes", destination);
+        return super.includes("WEB-INF/classes/", destination);
     }
 
     public War lib(File lib) {
-        return super.includes("WEB-INF/lib", lib);
+        return super.includes("WEB-INF/lib/", lib);
     }
 
     public War lib(Files lib) {
-        return super.includes("WEB-INF/lib", lib);
+        return super.includes("WEB-INF/lib/", lib);
     }
 
 }
