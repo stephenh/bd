@@ -13,9 +13,9 @@ public class Source {
     private final File destination;
     private final List<Files> libraries = new ArrayList<Files>();
 
-    public Source(String basePath, String destinationPath) {
+    public Source(String basePath, File destination) {
         this.sourceFiles.add(new Files(basePath));
-        this.destination = new File(destinationPath);
+        this.destination = destination;
     }
 
     public Source lib(Lib lib) {
@@ -56,10 +56,6 @@ public class Source {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public File getDestination() {
-        return this.destination;
     }
 
 }
