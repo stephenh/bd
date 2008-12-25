@@ -37,8 +37,18 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
         return (T) this;
     }
 
+    public T includesFlat(String prefix, Files files) {
+        this.files.add(new FilesWithPrefix(prefix, files, true));
+        return (T) this;
+    }
+
     public T includes(String prefix, File path) {
         this.files.add(new FilesWithPrefix(prefix, new Files(path)));
+        return (T) this;
+    }
+
+    public T includesFlat(String prefix, File path) {
+        this.files.add(new FilesWithPrefix(prefix, new Files(path), true));
         return (T) this;
     }
 
@@ -52,6 +62,9 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
                 for (File file : fwp.files.getFilesBySuffix()) {
                     // normalize the path (replace / with \ if required)
                     String entryName = this.removeBase(fwp.files.getBasePath().getPath(), file.getPath());
+                    if (fwp.flatten && entryName.contains("/")) {
+                        entryName = entryName.substring(entryName.lastIndexOf("/") + 1);
+                    }
                     byte[] data = this.readFile(file);
                     ZipEntry entry = new ZipEntry(fwp.prefix + entryName);
                     CRC32 crc = new CRC32();
@@ -106,10 +119,18 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
     private static final class FilesWithPrefix {
         private final String prefix;
         private final Files files;
+        private final boolean flatten;
 
         private FilesWithPrefix(String prefix, Files files) {
             this.prefix = prefix;
             this.files = files;
+            this.flatten = false;
+        }
+
+        private FilesWithPrefix(String prefix, Files files, boolean flatten) {
+            this.prefix = prefix;
+            this.files = files;
+            this.flatten = flatten;
         }
     }
 

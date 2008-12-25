@@ -29,11 +29,11 @@ public class War extends AbstractZip<War> {
     }
 
     public War lib(File lib) {
-        return super.includes("WEB-INF/lib/", lib);
+        return super.includesFlat("WEB-INF/lib/", lib);
     }
 
     public War lib(Files lib) {
-        return super.includes("WEB-INF/lib/", lib);
+        return super.includesFlat("WEB-INF/lib/", lib);
     }
 
 }
