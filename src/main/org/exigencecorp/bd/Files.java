@@ -35,7 +35,7 @@ public class Files {
         StringBuilder sb = new StringBuilder();
         for (String path : this.getPaths()) {
             sb.append(path);
-            sb.append(";");
+            sb.append(File.pathSeparator);
         }
         return sb.toString();
     }
