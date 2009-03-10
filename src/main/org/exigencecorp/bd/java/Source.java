@@ -1,9 +1,11 @@
 package org.exigencecorp.bd.java;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 
 import org.exigencecorp.bd.Files;
 
@@ -31,31 +33,36 @@ public class Source {
     public void compile() {
         this.destination.mkdirs();
         try {
-            Class<?> clazz = Class.forName("com.sun.tools.javac.Main");
-            Method compile = clazz.getMethod("compile", new Class[] { String[].class });
-            Object instance = clazz.newInstance();
+            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+            List<String> options = new ArrayList<String>();
 
-            List<String> args = new ArrayList<String>();
-            args.add("-d");
-            args.add(this.destination.getPath());
-            args.add("-cp");
-            String cp = "";
+            options.add("-cp");
             for (Files files : this.libraries) {
-                cp += files.getPathsJoined();
-            }
-            args.add(cp);
-            for (Files files : this.sourceFiles) {
-                args.addAll(files.getPaths());
+                options.add(files.getPathsJoined());
             }
 
-            String[] argsArray = args.toArray(new String[args.size()]);
-            Integer result = ((Integer) compile.invoke(instance, new Object[] { argsArray })).intValue();
+            options.add("-d");
+            options.add(this.destination.getPath());
+
+            for (Files files : this.sourceFiles) {
+                for (File file : files.getFiles()) {
+                    if (file.getName().endsWith("java")) {
+                        options.add(file.getPath());
+                    }
+                }
+            }
+
+            int result = compiler.run(null, null, null, options.toArray(new String[options.size()]));
             if (result != 0) {
                 throw new Error("An error occurred");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Files> getSourceFiles() {
+        return this.sourceFiles;
     }
 
 }
