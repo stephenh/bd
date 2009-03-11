@@ -68,14 +68,24 @@ public class BuildRunner {
 
     private void showHelp() {
         List<String> methodNames = new ArrayList<String>();
+        this.addMethodNames(methodNames, this.build.getClass(), "");
+        this.showMethodNames("Primary", methodNames);
+
+        methodNames.clear();
         for (Field field : this.build.getClass().getFields()) {
             this.addMethodNames(methodNames, field.getType(), field.getName() + ".");
         }
-        this.addMethodNames(methodNames, this.build.getClass(), "");
-        Collections.sort(methodNames);
-        System.out.println("Available targets:");
-        for (String methodName : methodNames) {
-            System.out.println("  " + methodName);
+        this.showMethodNames("Other", methodNames);
+    }
+
+    private void showMethodNames(String type, List<String> methodNames) {
+        if (methodNames.size() > 0) {
+            Collections.sort(methodNames);
+            System.out.println(type + " targets:");
+            for (String methodName : methodNames) {
+                System.out.println("  " + methodName);
+            }
+            System.out.println("");
         }
     }
 
