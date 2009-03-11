@@ -81,7 +81,10 @@ public class BuildRunner {
     private void addMethodNames(List<String> methodNames, Class<?> type, String prefix) {
         List<Method> objectMethods = Arrays.asList(Object.class.getMethods());
         for (Method method : type.getMethods()) {
-            if (method.getParameterTypes().length == 0 && !objectMethods.contains(method) && !method.getName().startsWith("get")) {
+            if (method.getParameterTypes().length == 0
+                && !objectMethods.contains(method)
+                && !method.getName().startsWith("get")
+                && method.getReturnType().equals(void.class)) {
                 methodNames.add(prefix + method.getName());
             }
         }
