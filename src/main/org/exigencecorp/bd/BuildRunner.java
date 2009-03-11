@@ -1,6 +1,7 @@
 package org.exigencecorp.bd;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,8 +13,12 @@ public class BuildRunner {
     public static void main(String[] args) {
         try {
             new BuildRunner(Class.forName("Build").newInstance(), args).run();
+            System.exit(0);
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
+            System.out.println("...FAILED");
+            System.out.println(""); // for the console
+            System.exit(1);
         }
     }
 
@@ -39,8 +44,7 @@ public class BuildRunner {
         for (String arg : this.args) {
             this.build(arg);
         }
-        System.out.println("...done");
-        System.exit(0);
+        System.out.println("...SUCCESS");
     }
 
     private void build(String arg) {
@@ -56,9 +60,14 @@ public class BuildRunner {
                 Method method = fieldValue.getClass().getMethod(parts[1]);
                 method.invoke(fieldValue);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
+        } catch (NoSuchMethodException nsme) {
+            throw new RuntimeException(nsme);
+        } catch (NoSuchFieldException nsfe) {
+            throw new RuntimeException(nsfe);
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        } catch (InvocationTargetException ite) {
+            throw new RuntimeException(ite.getCause());
         }
     }
 
