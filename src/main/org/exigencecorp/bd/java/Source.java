@@ -14,7 +14,7 @@ public class Source {
     private final List<Files> sourceFiles = new ArrayList<Files>();
     private final File destination;
     private final List<Files> libraries = new ArrayList<Files>();
-    private CompilerOptions options;
+    private CompilerOptions compilerOptions;
 
     public Source(String basePath, File destination) {
         this.sourceFiles.add(new Files(basePath));
@@ -32,7 +32,7 @@ public class Source {
     }
 
     public Source compilerOptions(CompilerOptions options) {
-        this.options = options;
+        this.compilerOptions = options;
         return this;
     }
 
@@ -44,7 +44,7 @@ public class Source {
         this.destination.mkdirs();
 
         List<String> options = new ArrayList<String>();
-        options.addAll(this.options.getCompilerOptions());
+        this.addCompilerOptions(options);
         this.addClasspathToOptions(options);
         this.addDestinationToOptions(options);
         this.addFilesToOptions(options);
@@ -58,6 +58,12 @@ public class Source {
         }
         if (result != 0) {
             throw new RuntimeException("Compile failed");
+        }
+    }
+
+    protected void addCompilerOptions(List<String> options) {
+        if (this.compilerOptions != null) {
+            options.addAll(this.compilerOptions.getCompilerOptions());
         }
     }
 
