@@ -19,6 +19,16 @@ public class Files {
         this.basePath = basePath;
     }
 
+    public void delete() {
+        List<File> all = this.getFilesAndDirectories();
+        while (all.size() != 0) {
+            File f = all.remove(all.size() - 1);
+            if (!f.delete()) {
+                throw new RuntimeException("Could not delete " + f);
+            }
+        }
+    }
+
     public Files includes(String includes) {
         this.includes.add(includes);
         return this;
@@ -46,6 +56,25 @@ public class Files {
         dirs.add(this.basePath);
         while (dirs.size() != 0) {
             for (File f : dirs.remove(0).listFiles()) {
+                if (f.isDirectory()) {
+                    dirs.add(f);
+                } else {
+                    files.add(f);
+                }
+            }
+        }
+        return files;
+    }
+
+    /** @return the directory first and then its files */
+    public List<File> getFilesAndDirectories() {
+        List<File> files = new ArrayList<File>();
+        List<File> dirs = new ArrayList<File>();
+        dirs.add(this.basePath);
+        while (dirs.size() != 0) {
+            File dir = dirs.remove(0);
+            files.add(dir);
+            for (File f : dir.listFiles()) {
                 if (f.isDirectory()) {
                     dirs.add(f);
                 } else {
