@@ -22,7 +22,7 @@ public class Dir {
         this.files().delete();
     }
 
-    public void make() {
+    public void mkdirs() {
         this.path.mkdirs();
     }
 

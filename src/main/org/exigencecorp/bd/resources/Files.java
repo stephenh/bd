@@ -53,15 +53,6 @@ public class Files {
         return paths;
     }
 
-    public String getPathsJoined() {
-        StringBuilder sb = new StringBuilder();
-        for (String path : this.getPaths()) {
-            sb.append(path);
-            sb.append(File.pathSeparator);
-        }
-        return sb.toString();
-    }
-
     /** @return the directory first and then its files */
     private List<File> getFilesAndDirectories(boolean includeDirs) {
         List<File> returnFiles = new ArrayList<File>();

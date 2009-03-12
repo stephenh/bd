@@ -14,6 +14,7 @@ public class Source extends Dir {
 
     private final Files sources = new Files();
     private final Files libraries = new Files();
+    private final List<Dir> output = new ArrayList<Dir>();
     private final Dir destination;
     private CompilerOptions compilerOptions;
 
@@ -28,6 +29,13 @@ public class Source extends Dir {
         return this;
     }
 
+    public Source lib(Source source) {
+        this.libraries.add(source.getLibraries());
+        this.output.addAll(source.getOutput());
+        this.output.add(source.getDestination());
+        return this;
+    }
+
     public Source addSource(String basePath) {
         this.sources.add(new Dir(basePath).files());
         return this;
@@ -39,7 +47,7 @@ public class Source extends Dir {
     }
 
     public void compile() {
-        this.destination.make();
+        this.destination.mkdirs();
 
         List<String> options = new ArrayList<String>();
         this.addCompilerOptions(options);
@@ -75,7 +83,16 @@ public class Source extends Dir {
 
     protected void addClasspathToOptions(List<String> options) {
         options.add("-cp");
-        options.add(this.libraries.getPathsJoined());
+        StringBuilder sb = new StringBuilder();
+        for (File file : this.libraries.getFiles()) {
+            sb.append(file.getPath());
+            sb.append(File.pathSeparator);
+        }
+        for (Dir dir : this.output) {
+            sb.append(dir.getPath());
+            sb.append(File.pathSeparator);
+        }
+        options.add(sb.toString());
     }
 
     protected void addDestinationToOptions(List<String> options) {
@@ -85,6 +102,18 @@ public class Source extends Dir {
 
     public Files getSources() {
         return this.sources;
+    }
+
+    public Files getLibraries() {
+        return this.libraries;
+    }
+
+    public Dir getDestination() {
+        return this.destination;
+    }
+
+    public List<Dir> getOutput() {
+        return this.output;
     }
 
 }
