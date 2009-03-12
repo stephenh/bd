@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
@@ -25,32 +27,24 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
     }
 
     public T includes(Files files) {
-        this.files.add(new FilesWithPrefix("", files));
-        return (T) this;
+        return this.includes("", files);
     }
 
-    public T includes(File path) {
-        this.files.add(new FilesWithPrefix("", new Files(path)));
-        return (T) this;
+    public T includes(Dir path) {
+        return this.includes("", path.files());
+    }
+
+    public T includes(String prefix, Dir dir) {
+        return this.includes(prefix, dir.files());
     }
 
     public T includes(String prefix, Files files) {
-        this.files.add(new FilesWithPrefix(prefix, files));
+        this.files.add(new FilesWithPrefix(prefix, files, false));
         return (T) this;
     }
 
     public T includesFlat(String prefix, Files files) {
         this.files.add(new FilesWithPrefix(prefix, files, true));
-        return (T) this;
-    }
-
-    public T includes(String prefix, File path) {
-        this.files.add(new FilesWithPrefix(prefix, new Files(path)));
-        return (T) this;
-    }
-
-    public T includesFlat(String prefix, File path) {
-        this.files.add(new FilesWithPrefix(prefix, new Files(path), true));
         return (T) this;
     }
 
@@ -61,21 +55,23 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
             ZipOutputStream zipOut = this.makeZipOutputStream(out);
             zipOut.setLevel(Deflater.BEST_COMPRESSION);
             for (FilesWithPrefix fwp : this.files) {
-                for (File file : fwp.files.getFilesBySuffix()) {
-                    // normalize the path (replace / with \ if required)
-                    String entryName = this.removeBase(fwp.files.getBasePath().getPath(), file.getPath());
-                    if (fwp.flatten && entryName.contains("/")) {
-                        entryName = entryName.substring(entryName.lastIndexOf("/") + 1);
+                for (Files files : fwp.files.getThisAndOthers()) {
+                    for (File file : this.getFilesBySuffix(files)) {
+                        // normalize the path (replace / with \ if required)
+                        String entryName = this.removeBase(files.getDir().getPath(), file.getPath());
+                        if (fwp.flatten && entryName.contains("/")) {
+                            entryName = entryName.substring(entryName.lastIndexOf("/") + 1);
+                        }
+                        byte[] data = this.readFile(file);
+                        ZipEntry entry = new ZipEntry(fwp.prefix + entryName);
+                        CRC32 crc = new CRC32();
+                        crc.update(data);
+                        entry.setSize(file.length());
+                        entry.setCrc(crc.getValue());
+                        zipOut.putNextEntry(entry);
+                        zipOut.write(data);
+                        zipOut.closeEntry();
                     }
-                    byte[] data = this.readFile(file);
-                    ZipEntry entry = new ZipEntry(fwp.prefix + entryName);
-                    CRC32 crc = new CRC32();
-                    crc.update(data);
-                    entry.setSize(file.length());
-                    entry.setCrc(crc.getValue());
-                    zipOut.putNextEntry(entry);
-                    zipOut.write(data);
-                    zipOut.closeEntry();
                 }
             }
             zipOut.closeEntry();
@@ -90,6 +86,28 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
     }
 
     protected abstract ZipOutputStream makeZipOutputStream(OutputStream out) throws IOException;
+
+    // for better compression, sort by suffix, then name
+    private List<File> getFilesBySuffix(Files filesObject) {
+        List<File> files = filesObject.getFiles();
+        Collections.sort(files, new Comparator<File>() {
+            public int compare(File o1, File o2) {
+                String p1 = (o1).getPath();
+                String p2 = (o2).getPath();
+                int comp = AbstractZip.this.getSuffix(p1).compareTo(AbstractZip.this.getSuffix(p2));
+                if (comp == 0) {
+                    comp = p1.compareTo(p2);
+                }
+                return comp;
+            }
+        });
+        return files;
+    }
+
+    private String getSuffix(String fileName) {
+        int idx = fileName.lastIndexOf('.');
+        return idx < 0 ? "" : fileName.substring(idx);
+    }
 
     private String removeBase(String basePath, String path) {
         if (path.startsWith(basePath)) {
@@ -122,12 +140,6 @@ public abstract class AbstractZip<T extends AbstractZip<T>> {
         private final String prefix;
         private final Files files;
         private final boolean flatten;
-
-        private FilesWithPrefix(String prefix, Files files) {
-            this.prefix = prefix;
-            this.files = files;
-            this.flatten = false;
-        }
 
         private FilesWithPrefix(String prefix, Files files, boolean flatten) {
             this.prefix = prefix;

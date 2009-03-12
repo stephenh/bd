@@ -2,31 +2,34 @@ package org.exigencecorp.bd.resources;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class Files {
 
-    private final File basePath;
+    private final Dir dir;
     private final List<String> includes = new ArrayList<String>();
+    private final List<Files> others = new ArrayList<Files>();
 
-    public Files(String basePath) {
-        this.basePath = new File(basePath);
+    public Files() {
+        this.dir = null;
     }
 
-    public Files(File basePath) {
-        this.basePath = basePath;
+    public Files(Dir dir) {
+        this.dir = dir;
     }
 
     public void delete() {
         List<File> all = this.getFilesAndDirectories();
         while (all.size() != 0) {
-            File f = all.remove(all.size() - 1);
-            if (!f.delete()) {
-                throw new RuntimeException("Could not delete " + f);
+            File file = all.remove(all.size() - 1);
+            if (!file.delete()) {
+                throw new RuntimeException("Could not delete " + file);
             }
         }
+    }
+
+    public void add(Files other) {
+        this.others.add(other);
     }
 
     public Files includes(String includes) {
@@ -34,11 +37,20 @@ public class Files {
         return this;
     }
 
-    public Files subset(String includes) {
-        Files subset = new Files(this.basePath);
-        subset.includes.addAll(this.includes);
-        subset.includes.add(includes);
-        return subset;
+    public List<File> getFiles() {
+        return this.getFilesAndDirectories(false);
+    }
+
+    public List<File> getFilesAndDirectories() {
+        return this.getFilesAndDirectories(true);
+    }
+
+    public List<String> getPaths() {
+        List<String> paths = new ArrayList<String>();
+        for (File file : this.getFiles()) {
+            paths.add(file.getPath());
+        }
+        return paths;
     }
 
     public String getPathsJoined() {
@@ -50,73 +62,48 @@ public class Files {
         return sb.toString();
     }
 
-    public List<File> getFiles() {
-        List<File> files = new ArrayList<File>();
-        List<File> dirs = new ArrayList<File>();
-        dirs.add(this.basePath);
-        while (dirs.size() != 0) {
-            for (File f : dirs.remove(0).listFiles()) {
-                if (f.isDirectory()) {
-                    dirs.add(f);
-                } else {
-                    files.add(f);
-                }
-            }
-        }
-        return files;
-    }
-
     /** @return the directory first and then its files */
-    public List<File> getFilesAndDirectories() {
-        List<File> files = new ArrayList<File>();
-        List<File> dirs = new ArrayList<File>();
-        dirs.add(this.basePath);
-        while (dirs.size() != 0) {
-            File dir = dirs.remove(0);
-            files.add(dir);
-            for (File f : dir.listFiles()) {
-                if (f.isDirectory()) {
-                    dirs.add(f);
-                } else {
-                    files.add(f);
+    private List<File> getFilesAndDirectories(boolean includeDirs) {
+        List<File> returnFiles = new ArrayList<File>();
+        if (this.dir != null) {
+            List<File> queue = new ArrayList<File>();
+            queue.add(this.dir.getFile());
+            if (includeDirs) {
+                returnFiles.add(this.dir.getFile());
+            }
+            while (queue.size() != 0) {
+                File dir = queue.remove(0);
+                for (File file : dir.listFiles()) {
+                    if (file.isDirectory()) {
+                        queue.add(file);
+                        if (includeDirs) {
+                            returnFiles.add(file);
+                        }
+                    } else {
+                        returnFiles.add(file);
+                    }
                 }
             }
+        }
+        for (Files other : this.others) {
+            returnFiles.addAll(other.getFilesAndDirectories(includeDirs));
+        }
+        return returnFiles;
+    }
+
+    public List<Files> getThisAndOthers() {
+        List<Files> files = new ArrayList<Files>();
+        if (this.dir != null) {
+            files.add(this);
+        }
+        for (Files other : this.others) {
+            files.addAll(other.getThisAndOthers());
         }
         return files;
     }
 
-    public List<String> getPaths() {
-        List<String> paths = new ArrayList<String>();
-        for (File file : this.getFiles()) {
-            paths.add(file.getPath());
-        }
-        return paths;
-    }
-
-    public List<File> getFilesBySuffix() {
-        // for better compressibility, sort by suffix, then name
-        List<File> files = this.getFiles();
-        Collections.sort(files, new Comparator<File>() {
-            public int compare(File o1, File o2) {
-                String p1 = (o1).getPath();
-                String p2 = (o2).getPath();
-                int comp = Files.this.getSuffix(p1).compareTo(Files.this.getSuffix(p2));
-                if (comp == 0) {
-                    comp = p1.compareTo(p2);
-                }
-                return comp;
-            }
-        });
-        return files;
-    }
-
-    private String getSuffix(String fileName) {
-        int idx = fileName.lastIndexOf('.');
-        return idx < 0 ? "" : fileName.substring(idx);
-    }
-
-    public File getBasePath() {
-        return this.basePath;
+    public Dir getDir() {
+        return this.dir;
     }
 
 }

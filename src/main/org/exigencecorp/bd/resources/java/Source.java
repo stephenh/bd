@@ -7,41 +7,39 @@ import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import org.exigencecorp.bd.resources.Dir;
 import org.exigencecorp.bd.resources.Files;
 
-public class Source {
+public class Source extends Dir {
 
-    private final List<Files> sourceFiles = new ArrayList<Files>();
-    private final File destination;
-    private final List<Files> libraries = new ArrayList<Files>();
+    private final Files sources = new Files();
+    private final Files libraries = new Files();
+    private final Dir destination;
     private CompilerOptions compilerOptions;
 
-    public Source(String basePath, File destination) {
-        this.sourceFiles.add(new Files(basePath));
+    public Source(String basePath, Dir destination) {
+        super(basePath);
+        this.sources.add(this.files());
         this.destination = destination;
     }
 
     public Source lib(Lib lib) {
-        this.libraries.add(lib.getJarFiles());
+        this.libraries.add(lib.files());
         return this;
     }
 
     public Source addSource(String basePath) {
-        this.sourceFiles.add(new Files(basePath));
+        this.sources.add(new Dir(basePath).files());
         return this;
     }
 
-    public Source compilerOptions(CompilerOptions options) {
-        this.compilerOptions = options;
+    public Source compilerOptions(CompilerOptions compilerOptions) {
+        this.compilerOptions = compilerOptions;
         return this;
-    }
-
-    public List<Files> getSourceFiles() {
-        return this.sourceFiles;
     }
 
     public void compile() {
-        this.destination.mkdirs();
+        this.destination.make();
 
         List<String> options = new ArrayList<String>();
         this.addCompilerOptions(options);
@@ -68,25 +66,25 @@ public class Source {
     }
 
     protected void addFilesToOptions(List<String> options) {
-        for (Files files : this.sourceFiles) {
-            for (File file : files.getFiles()) {
-                if (file.getName().endsWith(".java")) {
-                    options.add(file.getPath());
-                }
+        for (File file : this.sources.getFiles()) {
+            if (file.getName().endsWith(".java")) {
+                options.add(file.getPath());
             }
         }
     }
 
     protected void addClasspathToOptions(List<String> options) {
         options.add("-cp");
-        for (Files files : this.libraries) {
-            options.add(files.getPathsJoined());
-        }
+        options.add(this.libraries.getPathsJoined());
     }
 
     protected void addDestinationToOptions(List<String> options) {
         options.add("-d");
         options.add(this.destination.getPath());
+    }
+
+    public Files getSources() {
+        return this.sources;
     }
 
 }

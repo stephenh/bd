@@ -35,7 +35,7 @@ public class HomeCache {
         }
     }
 
-    private static File get() {
+    public static File get() {
         File dotbd = new File(new File(System.getProperty("user.home")), ".bd");
         dotbd.mkdirs();
         return dotbd;
