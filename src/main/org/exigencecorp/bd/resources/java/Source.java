@@ -7,11 +7,13 @@ import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import org.exigencecorp.bd.HomeCache;
 import org.exigencecorp.bd.resources.Dir;
 import org.exigencecorp.bd.resources.Files;
 
 public class Source extends Dir {
 
+    public static boolean defaultIncludeHomeCache = false;
     private final Files sources = new Files();
     private final Files libraries = new Files();
     private final List<Dir> output = new ArrayList<Dir>();
@@ -21,10 +23,13 @@ public class Source extends Dir {
     public Source(String basePath, Dir destination) {
         super(basePath);
         this.sources.add(this.files());
+        if (Source.defaultIncludeHomeCache) {
+            this.libraries.add(new Dir(HomeCache.get()).files());
+        }
         this.destination = destination;
     }
 
-    public Source lib(Lib lib) {
+    public Source lib(Dir lib) {
         this.libraries.add(lib.files());
         return this;
     }

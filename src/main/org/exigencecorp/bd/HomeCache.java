@@ -2,6 +2,7 @@ package org.exigencecorp.bd;
 
 import java.io.File;
 
+import org.exigencecorp.bd.resources.Files;
 import org.exigencecorp.bd.util.FileCopy;
 
 /**
@@ -27,11 +28,13 @@ public class HomeCache {
         FileCopy.copy(file, new File(HomeCache.get(), file.getName()));
     }
 
-    public static void updateIfNeeded(File file) {
-        File cacheFile = new File(HomeCache.get(), file.getName());
-        if (cacheFile.exists() && cacheFile.lastModified() > file.lastModified()) {
-            System.out.println("Found new " + file.getName());
-            FileCopy.copy(cacheFile, file);
+    public static void updateIfNeeded(Files files) {
+        for (File file : files.getFiles()) {
+            File cacheFile = new File(HomeCache.get(), file.getName());
+            if (cacheFile.exists() && cacheFile.lastModified() > file.lastModified()) {
+                System.out.println("Found new " + file.getName());
+                FileCopy.copy(cacheFile, file);
+            }
         }
     }
 

@@ -1,5 +1,8 @@
 package org.exigencecorp.bd.resources.java;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.exigencecorp.bd.resources.Dir;
 
 public class Tests extends Source {
@@ -9,7 +12,13 @@ public class Tests extends Source {
     }
 
     public void run() {
-        ProcessBuilder pb = new ProcessBuilder();
+        String javaHome = System.getProperty("java.home");
+        ProcessBuilder pb = new ProcessBuilder(javaHome + File.separator + "bin" + File.separator + "java");
+        try {
+            pb.start();
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
     }
 
 }

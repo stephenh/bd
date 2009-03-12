@@ -4,7 +4,7 @@ import java.io.File;
 
 public class Dir {
 
-    private File path;
+    private final File path;
 
     public Dir(String basePath) {
         this.path = new File(basePath);
