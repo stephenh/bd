@@ -88,6 +88,10 @@ public class Source extends Dir {
 
     protected void addClasspathToOptions(List<String> options) {
         options.add("-cp");
+        options.add(this.getJoinedClasspath());
+    }
+
+    public String getJoinedClasspath() {
         StringBuilder sb = new StringBuilder();
         for (File file : this.libraries.getFiles()) {
             sb.append(file.getPath());
@@ -97,7 +101,7 @@ public class Source extends Dir {
             sb.append(dir.getPath());
             sb.append(File.pathSeparator);
         }
-        options.add(sb.toString());
+        return sb.toString();
     }
 
     protected void addDestinationToOptions(List<String> options) {
