@@ -1,4 +1,4 @@
-package org.exigencecorp.bd;
+package org.exigencecorp.bd.resources;
 
 import java.io.File;
 import java.util.ArrayList;

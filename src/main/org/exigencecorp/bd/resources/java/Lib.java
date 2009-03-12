@@ -1,9 +1,9 @@
-package org.exigencecorp.bd.java;
+package org.exigencecorp.bd.resources.java;
 
 import java.io.File;
 
-import org.exigencecorp.bd.Files;
 import org.exigencecorp.bd.HomeCache;
+import org.exigencecorp.bd.resources.Files;
 
 public class Lib extends Files {
 

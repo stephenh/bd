@@ -1,4 +1,4 @@
-package org.exigencecorp.bd;
+package org.exigencecorp.bd.resources;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -12,6 +12,8 @@ import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.exigencecorp.bd.HomeCache;
 
 public abstract class AbstractZip<T extends AbstractZip<T>> {
 

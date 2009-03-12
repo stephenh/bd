@@ -1,4 +1,4 @@
-package org.exigencecorp.bd.java;
+package org.exigencecorp.bd.resources.java;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
-import org.exigencecorp.bd.Files;
+import org.exigencecorp.bd.resources.Files;
 
 public class Source {
 

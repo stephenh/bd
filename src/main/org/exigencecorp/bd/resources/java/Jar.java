@@ -1,11 +1,11 @@
-package org.exigencecorp.bd.java;
+package org.exigencecorp.bd.resources.java;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.exigencecorp.bd.AbstractZip;
+import org.exigencecorp.bd.resources.AbstractZip;
 
 public class Jar extends AbstractZip<Jar> {
 
