@@ -1,13 +1,12 @@
 package org.exigencecorp.bd.resources.java;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.exigencecorp.bd.resources.Files;
+import org.exigencecorp.bd.util.Execute;
+import org.exigencecorp.bd.util.Execute.Result;
 
 public class Tests {
 
@@ -21,7 +20,6 @@ public class Tests {
         String javaHome = System.getProperty("java.home");
 
         List<String> command = new ArrayList<String>();
-        command.add(javaHome + File.separator + "bin" + File.separator + "java");
         command.add("-cp");
         command.add(this.source.getJoinedClasspath() + this.source.getDestination().getPath());
         command.add("junit.textui.TestRunner");
@@ -43,31 +41,9 @@ public class Tests {
             }
         }
 
-        System.out.println(command);
-
-        try {
-            ProcessBuilder pb = new ProcessBuilder().command(command);
-            Process p = pb.start();
-            p.getOutputStream().close();
-
-            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line;
-            while ((line = r.readLine()) != null) {
-                System.out.println(line);
-            }
-            r.close();
-
-            r = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            while ((line = r.readLine()) != null) {
-                System.out.println(line);
-            }
-            r.close();
-
-            p.waitFor();
-            System.out.println(p.exitValue());
-
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
+        Result r = new Execute("java").copyEnv().path(javaHome + File.separator + "bin").args(command).toBuffer();
+        System.out.println(r.out.toString());
+        System.out.println(r.err.toString());
+        System.out.println(r.success);
     }
 }
