@@ -4,10 +4,11 @@ import org.exigencecorp.bd.resources.Dir;
 
 public class StandardJavaBuild {
 
-    protected Dir bin = new Dir("bin");
-    protected Dir lib = new Dir("lib");
-    protected Dir src = new Dir("src");
-    protected Dir tests = new Dir("tests");
+    protected Dir base = new Dir(".");
+    protected Dir bin = this.base.dir("bin");
+    protected Dir lib = this.base.dir("lib");
+    protected Dir src = this.base.dir("src");
+    protected Dir tests = this.base.dir("tests");
     protected CompilerOptions compilerOptions = new CompilerOptions().debug().oneSix();
 
     public Module src(String name) {
