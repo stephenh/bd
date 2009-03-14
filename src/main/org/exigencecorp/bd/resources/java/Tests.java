@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.exigencecorp.bd.BuildRunner;
 import org.exigencecorp.bd.resources.Files;
 import org.exigencecorp.bd.util.Execute;
 import org.exigencecorp.bd.util.Execute.Result;
@@ -22,7 +23,7 @@ public class Tests {
         List<String> command = new ArrayList<String>();
         command.add("-cp");
         command.add(this.source.getJoinedClasspath() + this.source.getDestination().getPath());
-        command.add("junit.textui.TestRunner");
+        command.add("org.junit.runner.JUnitCore");
 
         for (Files files : this.source.getSources().getThisAndOthers()) {
             for (File file : files.getFiles()) {
@@ -44,6 +45,9 @@ public class Tests {
         Result r = new Execute("java").copyEnv().path(javaHome + File.separator + "bin").args(command).toBuffer();
         System.out.println(r.out.toString());
         System.out.println(r.err.toString());
-        System.out.println(r.success);
+        if (!r.success) {
+            BuildRunner.fail("Tests failed");
+        }
     }
+
 }

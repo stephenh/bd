@@ -10,14 +10,25 @@ import java.util.List;
 
 public class BuildRunner {
 
+    private static boolean failed = false;
+
+    public static void fail(String message) {
+        BuildRunner.failed = true;
+    }
+
     public static void main(String[] args) {
+        System.out.println("Building...");
         try {
             new BuildRunner(Class.forName("Build").newInstance(), args).run();
-            System.exit(0);
         } catch (Exception e) {
             e.printStackTrace(System.out);
-            System.out.println("...FAILED");
             System.out.println(""); // for the console
+        }
+        if (!BuildRunner.failed) {
+            System.out.println("...SUCCESS");
+            System.exit(0);
+        } else {
+            System.out.println("...FAILED");
             System.exit(1);
         }
     }
@@ -40,11 +51,9 @@ public class BuildRunner {
     }
 
     private void build() {
-        System.out.println("Building...");
         for (String arg : this.args) {
             this.build(arg);
         }
-        System.out.println("...SUCCESS");
     }
 
     private void build(String arg) {
